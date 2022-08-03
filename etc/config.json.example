@@ -1,0 +1,8 @@
+{
+    "user": "",
+    "password": "",
+    "host": "",
+    "port": 22,
+    "uploadDir": "",
+    "downloadDir": ""
+}
