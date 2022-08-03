@@ -20,3 +20,7 @@
 + fs -h - help
 + fs upload filename - 上传
 + fs download filename - 下载
+
+### ROADMAP
++ 记录命令历史
++ 优化下载进度条
