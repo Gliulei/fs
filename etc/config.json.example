@@ -1,8 +1,18 @@
 {
-    "user": "",
-    "password": "",
-    "host": "",
-    "port": 22,
-    "uploadDir": "",
-    "downloadDir": ""
+	"default": {
+		"user": "",
+		"password": "",
+		"host": "",
+		"port": 22,
+		"uploadDir": "",
+		"downloadDir": ""
+	},
+	"default1": {
+		"username": "",
+		"password": "",
+		"host": "",
+		"port": 22,
+		"uploadDir": "",
+		"downloadDir": ""
+	}
 }

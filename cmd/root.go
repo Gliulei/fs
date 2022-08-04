@@ -8,21 +8,27 @@ import (
 	"fmt"
 	"github.com/bramvdbogaerde/go-scp"
 	"github.com/bramvdbogaerde/go-scp/auth"
-	"golang.org/x/crypto/ssh"
-	"os"
-
+	"github.com/cheggaaa/pb/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/ssh"
+	"io"
+	"io/ioutil"
+	"os"
+	"path"
+	"strings"
 )
 
 var cfg *SshConfig
 
+var cfgs map[string]*SshConfig
+
 type SshConfig struct {
-	Host string
-	UserName string
-	Password string
-	Port int
-	UploadDir string
+	Host        string
+	UserName    string
+	Password    string
+	Port        int
+	UploadDir   string
 	DownloadDir string
 }
 
@@ -89,42 +95,49 @@ func initConfig() {
 		//fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-
-	if err := viper.Unmarshal(&cfg); err != nil {
-		fmt.Fprintln(os.Stderr,"Unmarshal err:", err.Error())
+	if err := viper.Unmarshal(&cfgs); err != nil {
+		fmt.Fprintln(os.Stderr, "Unmarshal err:", err.Error())
 	}
-	checkSshErr(cfg)
+	checkSshErr(cfgs)
+
+	//read in used config
+	b,_ := ioutil.ReadFile(getUsedConfigFile())
+	group := strings.TrimSpace(string(b))
+	if c,ok := cfgs[group]; ok {
+		cfg = c
+	}
 }
 
-func checkSshErr(cfg *SshConfig) {
-	if cfg.UserName == "" || cfg.Password == "" {
-		fmt.Println("[error]user or password is empty")
-		os.Exit(1)
-	}
+func checkSshErr(cfgs map[string]*SshConfig) {
+	for _, cfg := range cfgs {
+		if cfg.UserName == "" || cfg.Password == "" {
+			fmt.Println("[error]user or password is empty")
+			os.Exit(1)
+		}
 
-	if cfg.Port == 0 {
-		cfg.Port = 22
-	}
+		if cfg.Port == 0 {
+			cfg.Port = 22
+		}
 
-	if cfg.UploadDir == "" {
-		cfg.UploadDir = "/home/" + cfg.UserName
-	}
+		if cfg.UploadDir == "" {
+			cfg.UploadDir = "/home/" + cfg.UserName
+		}
 
-	if cfg.DownloadDir == "" {
-		cfg.DownloadDir = "/home/" + cfg.UserName
+		if cfg.DownloadDir == "" {
+			cfg.DownloadDir = "/home/" + cfg.UserName
+		}
 	}
-
 
 }
 
-func establishScpClient() (scp.Client,error){
+func establishScpClient() (scp.Client, error) {
 	// we ignore the host key in this example, please change this if you use this library
 	clientConfig, _ := auth.PasswordKey(cfg.UserName, cfg.Password, ssh.InsecureIgnoreHostKey())
 
 	// For other authentication methods see ssh.ClientConfig and ssh.AuthMethod
 
 	// Create a new SCP client
-	client := scp.NewClient(fmt.Sprintf("%s:%d",cfg.Host,cfg.Port), &clientConfig)
+	client := scp.NewClient(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), &clientConfig)
 
 	// Connect to the remote server
 	err := client.Connect()
@@ -133,4 +146,51 @@ func establishScpClient() (scp.Client,error){
 	}
 
 	return client, err
+}
+
+func passThru(r io.Reader, total int64) io.Reader {
+	// start new bar
+	reader := io.LimitReader(r, total)
+
+	tmpl := `{{counters . }}  {{ bar . "[" "=" ">" "_" "|"}} {{rtime . "%s ]"}} {{speed . "%s/s" | rndcolor }} {{percent . | green}}`
+	bar := pb.ProgressBarTemplate(tmpl).Start64(total)
+	//bar := pb.Full.Start64(total)
+	bar.Set(pb.SIBytesPrefix, true)
+	bar.SetMaxWidth(100)
+
+	// set custom bar template
+	//bar.SetTemplateString(myTemplate)
+
+	// create proxy reader
+	barReader := bar.NewProxyReader(reader)
+
+	return barReader
+
+}
+
+func getUsedConfigFile() string {
+	// Find home directory.
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+	file := path.Join(home, ".fs", "use.txt")
+	return file
+}
+
+func openInUseFile(cmd string) (*os.File, error) {
+	// Find home directory.
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+	file := path.Join(home, ".fs", "use.txt")
+
+	// Open a file
+	flag := os.O_RDWR|os.O_CREATE
+	if cmd == "use" {
+		flag |=os.O_TRUNC
+	}
+	f, err := os.OpenFile(file, flag, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }

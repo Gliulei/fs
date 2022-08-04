@@ -6,15 +6,10 @@ package cmd
 
 import (
 	"context"
-	"github.com/cheggaaa/pb/v3/termutil"
 	"github.com/ngaut/log"
 	"github.com/spf13/cobra"
-	"github.com/vbauerster/mpb/v7"
-	"github.com/vbauerster/mpb/v7/decor"
-	"io"
 	"os"
 	"path"
-	"time"
 )
 
 // downloadCmd represents the download command
@@ -59,33 +54,6 @@ to quickly create a Cobra application.`,
 		defer f.Close()
 
 		//err = client.CopyFromRemote(context.Background(), f, remoteFile)
-
-		passThru := func(r io.Reader, total int64) io.Reader {
-			width, _:= termutil.TerminalWidth()
-			reader := io.LimitReader(r, total)
-
-			p := mpb.New(
-				mpb.WithWidth(width - 40),
-				mpb.WithRefreshRate(180*time.Millisecond),
-			)
-
-			bar := p.New(total,
-				mpb.BarStyle().Rbound("|"),
-				mpb.PrependDecorators(
-					decor.CountersKibiByte("% .2f / % .2f"),
-				),
-				mpb.AppendDecorators(
-					decor.EwmaETA(decor.ET_STYLE_GO, 90),
-					decor.Name(" ] "),
-					decor.EwmaSpeed(decor.UnitKiB, "% .2f", 60),
-				),
-			)
-			barReader := bar.ProxyReader(reader)
-
-			return barReader
-
-		}
-
 		err = client.CopyFromRemotePassThru(context.Background(), f, remoteFile, passThru)
 
 		if err != nil {
