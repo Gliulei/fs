@@ -20,6 +20,7 @@
 + fs -h - help
 + fs upload filename - 上传
 + fs download filename - 下载
++ fs use group - 使用哪个组
 
 ## ROADMAP
 + 记录命令历史
