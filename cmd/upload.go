@@ -31,6 +31,9 @@ var uploadCmd = &cobra.Command{
 		defer client.Close()
 
 		srcFile := args[0]
+		if !path.IsAbs(srcFile) {
+			srcFile = path.Join(cfg.DownloadDir, srcFile)
+		}
 		filename := path.Base(srcFile)
 		// Open a file
 		f, err := os.Open(srcFile)
