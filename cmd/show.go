@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 )
 
 // showCmd represents the show command
@@ -16,7 +17,12 @@ var showCmd = &cobra.Command{
 	Short: "查看配置文件",
 	Long: `查看配置文件`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(viper.AllSettings())
+		b0,_ := ioutil.ReadFile(getUsedConfigFile())
+		fmt.Println(fmt.Sprintf("key `%s` is used", string(b0)))
+
+		file := viper.ConfigFileUsed()
+		b,_ := ioutil.ReadFile(file)
+		fmt.Println(string(b))
 	},
 }
 
