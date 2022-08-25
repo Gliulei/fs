@@ -50,14 +50,14 @@ var uploadCmd = &cobra.Command{
 
 		// the context can be adjusted to provide time-outs or inherit from other contexts if this is embedded in a larger application.
 		remoteFile := path.Join(cfg.UploadDir, filename)
-		err = client.CopyFromFile(context.Background(), *f, remoteFile, "0655")
+		err = client.CopyFromFilePassThru(context.Background(), *f, remoteFile, "0655", passThru)
 
 		if err != nil {
 			log.Errorf("Error while copying file %s", err.Error())
 			return
 		}
 
-		log.Infof("upload %s success, file in %s", srcFile, remoteFile)
+		//log.Infof("upload %s success, file in %s", srcFile, remoteFile)
 	},
 }
 

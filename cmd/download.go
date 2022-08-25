@@ -61,7 +61,7 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		log.Infof("download %s success, file in %s",remoteFile, srcFile)
+		//log.Infof("download %s success, file in %s",remoteFile, srcFile)
 	},
 }
 
