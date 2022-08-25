@@ -1,6 +1,6 @@
 {
 	"default": {
-		"user": "",
+		"username": "",
 		"password": "",
 		"host": "",
 		"port": 22,
