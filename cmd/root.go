@@ -176,6 +176,18 @@ func getUsedConfigFile() string {
 	return file
 }
 
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	return false, err
+}
+
 func openInUseFile(cmd string) (*os.File, error) {
 	// Find home directory.
 	home, err := os.UserHomeDir()
