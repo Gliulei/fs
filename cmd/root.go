@@ -19,6 +19,7 @@ import (
 	"strings"
 )
 
+var bar *pb.ProgressBar
 var cfg *SshConfig
 
 var cfgs map[string]*SshConfig
@@ -153,7 +154,7 @@ func passThru(r io.Reader, total int64) io.Reader {
 	reader := io.LimitReader(r, total)
 
 	tmpl := `{{counters . }}  {{ bar . "[" "=" ">" "_" "|"}} {{rtime . "%s ]"}} {{speed . "%s/s" | rndcolor }} {{percent . | green}}`
-	bar := pb.ProgressBarTemplate(tmpl).Start64(total)
+	bar = pb.ProgressBarTemplate(tmpl).Start64(total)
 	//bar := pb.Full.Start64(total)
 	bar.Set(pb.SIBytesPrefix, true)
 	bar.SetMaxWidth(100)
@@ -174,23 +175,4 @@ func getUsedConfigFile() string {
 	cobra.CheckErr(err)
 	file := path.Join(home, ".fs", "use.txt")
 	return file
-}
-
-func openInUseFile(cmd string) (*os.File, error) {
-	// Find home directory.
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
-	file := path.Join(home, ".fs", "use.txt")
-
-	// Open a file
-	flag := os.O_RDWR|os.O_CREATE
-	if cmd == "use" {
-		flag |=os.O_TRUNC
-	}
-	f, err := os.OpenFile(file, flag, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	return f, nil
 }

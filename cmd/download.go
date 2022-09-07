@@ -56,6 +56,9 @@ to quickly create a Cobra application.`,
 		//err = client.CopyFromRemote(context.Background(), f, remoteFile)
 		err = client.CopyFromRemotePassThru(context.Background(), f, remoteFile, passThru)
 
+		if bar != nil {
+			bar.Finish()
+		}
 		if err != nil {
 			log.Errorf("Error while copying file %s", err.Error())
 			return

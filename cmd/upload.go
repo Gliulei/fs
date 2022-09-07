@@ -52,6 +52,9 @@ var uploadCmd = &cobra.Command{
 		remoteFile := path.Join(cfg.UploadDir, filename)
 		err = client.CopyFromFilePassThru(context.Background(), *f, remoteFile, "0655", passThru)
 
+		if bar != nil {
+			bar.Finish()
+		}
 		if err != nil {
 			log.Errorf("Error while copying file %s", err.Error())
 			return
