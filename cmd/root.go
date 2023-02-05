@@ -34,6 +34,7 @@ type SshConfig struct {
 }
 
 var cfgFile string
+var group string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -71,6 +72,8 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	uploadCmd.Flags().StringVar(&group, "g", "", "choose group")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -102,9 +105,11 @@ func initConfig() {
 	checkSshErr(cfgs)
 
 	//read in used config
-	b,_ := ioutil.ReadFile(getUsedConfigFile())
-	group := strings.TrimSpace(string(b))
-	if c,ok := cfgs[group]; ok {
+	if len(group) < 1 {
+		b, _ := ioutil.ReadFile(getUsedConfigFile())
+		group = strings.TrimSpace(string(b))
+	}
+	if c, ok := cfgs[group]; ok {
 		cfg = c
 	}
 }
