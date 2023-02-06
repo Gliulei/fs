@@ -73,7 +73,7 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	uploadCmd.Flags().StringVar(&group, "g", "", "choose group")
+	rootCmd.Flags().StringVar(&group, "g", "", "choose group")
 }
 
 // initConfig reads in config file and ENV variables if set.
