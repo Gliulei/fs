@@ -6,6 +6,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -21,6 +24,34 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		user := cmd.Flag("user").Value
+		pwd := cmd.Flag("pwd").Value
+		host := cmd.Flag("host").Value
+		upload := cmd.Flag("ud").Value
+		download := cmd.Flag("dd").Value
+
+		portVal := cmd.Flag("port").Value
+		port, _ := strconv.Atoi(portVal.String())
+
+		config := SshConfig{
+			UserName:    user.String(),
+			Password:    pwd.String(),
+			Host:        host.String(),
+			Port:        port,
+			UploadDir:   upload.String(),
+			DownloadDir: download.String(),
+		}
+
+		instance := fmt.Sprintf("%s_%s", host, port)
+		if _, ok := cfgs[instance]; !ok {
+			cfgs[instance] = &config
+		}
+
+		for _,cfg := range cfgs {
+			fmt.Println(cfg)
+		}
+
+		//fmt.Println(cfgs)
 		fmt.Println("add called")
 	},
 }
@@ -38,10 +69,14 @@ func init() {
 	// is called directly, e.g.:
 	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
+	home, _ := os.UserHomeDir()
+	defaultUploadDir = home
+	defaultDownloadDir = path.Join(home, "download")
+
 	addCmd.Flags().StringP("user", "u", "", "username")
 	addCmd.Flags().StringP("pwd", "p", "", "password")
-	addCmd.Flags().StringP("host", "h", "", "choose group")
-	addCmd.Flags().StringP("port", "P", "", "port")
-	addCmd.Flags().StringP("upload", "ud", "", "upload file dir")
-	addCmd.Flags().StringP("download", "dd", "", "download file dir")
+	addCmd.Flags().StringP("host", "H", "", "choose group")
+	addCmd.Flags().IntP("port", "P", 0, "port")
+	addCmd.Flags().String("ud", defaultUploadDir, "upload file dir")
+	addCmd.Flags().String("dd", defaultDownloadDir, "download file dir")
 }

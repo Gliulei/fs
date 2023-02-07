@@ -35,6 +35,8 @@ type SshConfig struct {
 
 var cfgFile string
 var group string
+var defaultUploadDir string
+var defaultDownloadDir string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -126,11 +128,11 @@ func checkSshErr(cfgs map[string]*SshConfig) {
 		}
 
 		if cfg.UploadDir == "" {
-			cfg.UploadDir = "/home/" + cfg.UserName
+			cfg.UploadDir = defaultUploadDir
 		}
 
 		if cfg.DownloadDir == "" {
-			cfg.DownloadDir = "/home/" + cfg.UserName
+			cfg.DownloadDir = defaultDownloadDir
 		}
 	}
 
