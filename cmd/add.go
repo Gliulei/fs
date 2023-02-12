@@ -6,6 +6,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ngaut/log"
+	"github.com/spf13/viper"
 	"os"
 	"path"
 	"strconv"
@@ -32,7 +34,6 @@ to quickly create a Cobra application.`,
 
 		portVal := cmd.Flag("port").Value
 		port, _ := strconv.Atoi(portVal.String())
-
 		config := SshConfig{
 			UserName:    user.String(),
 			Password:    pwd.String(),
@@ -42,17 +43,10 @@ to quickly create a Cobra application.`,
 			DownloadDir: download.String(),
 		}
 
-		instance := fmt.Sprintf("%s_%s", host, port)
-		if _, ok := cfgs[instance]; !ok {
-			cfgs[instance] = &config
-		}
-
-		for _,cfg := range cfgs {
-			fmt.Println(cfg)
-		}
-
-		//fmt.Println(cfgs)
-		fmt.Println("add called")
+		instance := fmt.Sprintf("%s_%d", host, port)
+		viper.Set(instance, config)
+		viper.WriteConfig()
+		log.Infof("%s add called", instance)
 	},
 }
 
