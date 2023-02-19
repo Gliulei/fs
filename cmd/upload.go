@@ -16,7 +16,7 @@ import (
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
 	Short: "upload file",
-	Long: `upload file to dest host`,
+	Long:  `upload file to dest host`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			log.Error("No upload file specified")
@@ -32,7 +32,7 @@ var uploadCmd = &cobra.Command{
 
 		srcFile := args[0]
 		if !path.IsAbs(srcFile) {
-            pwd, _ := os.Getwd()
+			pwd, _ := os.Getwd()
 			if isOk, _ := pathExists(path.Join(pwd, srcFile)); !isOk {
 				srcFile = path.Join(cfg.DownloadDir, srcFile)
 			}
@@ -62,7 +62,10 @@ var uploadCmd = &cobra.Command{
 			log.Errorf("Error while copying file %s", err.Error())
 			return
 		}
-
+		//记录history
+		cmdLog := []string{"fs", "upload"}
+		cmdLog = append(cmdLog, args...)
+		record(cmdLog)
 		//log.Infof("upload %s success, file in %s", srcFile, remoteFile)
 	},
 }

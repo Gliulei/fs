@@ -64,6 +64,10 @@ to quickly create a Cobra application.`,
 			return
 		}
 
+		//记录history
+		cmdLog := []string{"fs", "download"}
+		cmdLog = append(cmdLog, args...)
+		record(cmdLog)
 		//log.Infof("download %s success, file in %s",remoteFile, srcFile)
 	},
 }

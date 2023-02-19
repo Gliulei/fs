@@ -38,6 +38,8 @@ var group string
 var defaultUploadDir string
 var defaultDownloadDir string
 
+const fsDir = ".fs"
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "fs",
@@ -180,7 +182,7 @@ func getUsedConfigFile() string {
 	// Find home directory.
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
-	file := path.Join(home, ".fs", "use.txt")
+	file := path.Join(home, fsDir, "use.txt")
 	return file
 }
 
