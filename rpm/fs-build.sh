@@ -15,4 +15,4 @@ rpmbuild_dir=$CUR_DIR/rpmbuild
 rm -rf $rpmbuild_dir
 
 rpmbuild --define "_topdir $rpmbuild_dir" -bb fs.spec
-find $rpmbuild_dir/RPMS/-name "*.rpm" -exec '{}' $CUR_DIR \;
+find $rpmbuild_dir/RPMS/ -name "*.rpm" -exec mv '{}' $CUR_DIR \;
