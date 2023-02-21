@@ -1,33 +1,34 @@
-#软件包的名字
 Name: fs
+Version: %(echo $VERSION)
+Release: %(echo $RELEASE)%{?dist}
+Summary: fs
 Group: Development/Tools
 BuildRoot: %_topdir/BUILDROOT
+License: GPL
 
 #软件包的内容介绍
 %description
 upload or download file tool
 
-#BUILD字段，将通过直接调用源码目录中自动构建工具完成源码编译操作
-%build
-cd nginx-1.2.1
-
-#调用源码目录中的configure命令
-./configure --prefix=/usr/local/nginx
-
-#在源码目录中执行自动构建命令make
-make
-
 #安装字段
 %install
+SRC_DIR=$OLDPWD/..
+cd $SRC_DIR/
 
-#调用源码中安装执行脚本
-make install
-%preun
-if [ -z "`ps aux | grep nginx | grep -v grep`" ];then
-killall nginx >/dev/null
-exit 0
-fi
+make build
+echo ${RPM_BUILD_ROOT}
+mkdir -p ${RPM_BUILD_ROOT}/usr/local/bin
+cp -rf $SRC_DIR/fs ${RPM_BUILD_ROOT}/usr/local/bin/fs
 
-#文件说明字段，声明多余或者缺少都将可能出错
+# package infomation
 %files
-#声明/usr/local/nginx将出现在软件包中/usr/local/nginx
+# set file attribute here
+%defattr(-,root,root,0755)
+# need not list every file here, keep it as this
+/usr/local/bin/fs
+
+## create an empy dir
+
+%post
+# description: fs ....
+chmod +x /usr/local/bin/fs
