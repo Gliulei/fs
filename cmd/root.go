@@ -130,7 +130,7 @@ func checkSshErr(cfgs map[string]*SshConfig) {
 		}
 
 		if cfg.UploadDir == "" {
-			cfg.UploadDir = defaultUploadDir
+			cfg.UploadDir = "/home/" + cfg.UserName
 		}
 
 		if cfg.DownloadDir == "" {

@@ -15,7 +15,7 @@ import (
 var useCmd = &cobra.Command{
 	Use:   "use",
 	Short: "which group to use",
-	Long: `which group to use.`,
+	Long:  "which group to use",
 	Run: func(cmd *cobra.Command, args []string) {
 		groupName := args[0]
 		if len(groupName) < 1 {
