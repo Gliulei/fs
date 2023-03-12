@@ -21,10 +21,12 @@
 + fs upload filename - 上传
 + fs download filename - 下载
 + fs use group - 使用哪个组
++ fs completion -h - 自动补全帮助
 
 ## ROADMAP
 + [x] 上传文件加个在当前目录下find
 + [x] 记录命令历史
 + [x] 配置增加
++ [x] SHELL Zsh|Bash 自动补全
 + [ ] 配置删除
 + [ ] 多文件下载|上传
