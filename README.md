@@ -28,5 +28,6 @@
 + [x] 记录命令历史
 + [x] 配置增加
 + [x] SHELL Zsh|Bash 自动补全
++ [ ] 实现类似scp /home/space/music/ root@www.runoob.com:/home/root/others/功能，自动记忆
 + [ ] 配置删除
 + [ ] 多文件下载|上传 
