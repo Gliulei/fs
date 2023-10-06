@@ -22,22 +22,20 @@ var uploadCmd = &cobra.Command{
 			log.Error("No upload file specified")
 			return
 		}
-		client, err := establishScpClient()
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		// Close client connection after the file has been copied
-		defer client.Close()
 
 		srcFile := args[0]
+		remoteDir := cfg.UploadDir
+		filename := path.Base(srcFile)
+		if len(args) > 1 {
+			remoteDir, filename = path.Split(args[1])
+		}
+		//是否是绝对路径
 		if !path.IsAbs(srcFile) {
 			pwd, _ := os.Getwd()
 			if isOk, _ := pathExists(path.Join(pwd, srcFile)); !isOk {
 				srcFile = path.Join(cfg.DownloadDir, srcFile)
 			}
 		}
-		filename := path.Base(srcFile)
 		// Open a file
 		f, err := os.Open(srcFile)
 		if err != nil {
@@ -48,11 +46,22 @@ var uploadCmd = &cobra.Command{
 		// Close the file after it has been copied
 		defer f.Close()
 
+		client, err := establishScpClient()
+		if err != nil {
+			log.Error(err)
+			return
+		}
+		// Close client connection after the file has been copied
+		defer client.Close()
+
 		// Finaly, copy the file over
 		// Usage: CopyFromFile(context, file, remotePath, permission)
 
 		// the context can be adjusted to provide time-outs or inherit from other contexts if this is embedded in a larger application.
-		remoteFile := path.Join(cfg.UploadDir, filename)
+		if filename == "" {
+			filename = cfg.UploadDir
+		}
+		remoteFile := path.Join(remoteDir, filename)
 		err = client.CopyFromFilePassThru(context.Background(), *f, remoteFile, "0655", passThru)
 
 		if bar != nil {
