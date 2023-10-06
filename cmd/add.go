@@ -19,7 +19,7 @@ import (
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "add command",
-	Long: `add command`,
+	Long:  `add command`,
 	Run: func(cmd *cobra.Command, args []string) {
 		user := cmd.Flag("user").Value
 		pwd := cmd.Flag("pwd").Value
@@ -30,7 +30,7 @@ var addCmd = &cobra.Command{
 		portVal := cmd.Flag("port").Value
 		port, _ := strconv.Atoi(portVal.String())
 		config := SshConfig{
-			UserName:    user.String(),
+			User:        user.String(),
 			Password:    pwd.String(),
 			Host:        host.String(),
 			Port:        port,

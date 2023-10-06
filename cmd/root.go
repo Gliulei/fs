@@ -25,12 +25,12 @@ var cfg *SshConfig
 var cfgs map[string]*SshConfig
 
 type SshConfig struct {
-	Host        string
-	UserName    string
-	Password    string
-	Port        int
-	UploadDir   string
-	DownloadDir string
+	Host        string `mapstructure:"host"`
+	User        string `mapstructure:"user"`
+	Password    string `mapstructure:"password"`
+	Port        int    `mapstructure:"port"`
+	UploadDir   string `mapstructure:"upload_dir"`
+	DownloadDir string `mapstructure:"download_dir"`
 }
 
 var cfgFile string
@@ -71,7 +71,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fs.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fs/fs.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -92,8 +92,8 @@ func initConfig() {
 
 		// Search config in home directory with name ".fs" (without extension).
 		viper.AddConfigPath(home + "/.fs")
-		viper.SetConfigType("json")
-		viper.SetConfigName("config")
+		viper.SetConfigType("yaml")
+		viper.SetConfigName("fs")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -106,6 +106,8 @@ func initConfig() {
 	if err := viper.Unmarshal(&cfgs); err != nil {
 		fmt.Fprintln(os.Stderr, "Unmarshal err:", err.Error())
 	}
+
+	//fmt.Printf("%+v\n", cfgs["default"])
 	checkSshErr(cfgs)
 
 	//read in used config
@@ -120,7 +122,7 @@ func initConfig() {
 
 func checkSshErr(cfgs map[string]*SshConfig) {
 	for _, cfg := range cfgs {
-		if cfg.UserName == "" || cfg.Password == "" {
+		if cfg.User == "" || cfg.Password == "" {
 			fmt.Println("[error]user or password is empty")
 			os.Exit(1)
 		}
@@ -130,7 +132,7 @@ func checkSshErr(cfgs map[string]*SshConfig) {
 		}
 
 		if cfg.UploadDir == "" {
-			cfg.UploadDir = "/home/" + cfg.UserName
+			cfg.UploadDir = "/home/" + cfg.User
 		}
 
 		if cfg.DownloadDir == "" {
@@ -142,7 +144,7 @@ func checkSshErr(cfgs map[string]*SshConfig) {
 
 func establishScpClient() (scp.Client, error) {
 	// we ignore the host key in this example, please change this if you use this library
-	clientConfig, _ := auth.PasswordKey(cfg.UserName, cfg.Password, ssh.InsecureIgnoreHostKey())
+	clientConfig, _ := auth.PasswordKey(cfg.User, cfg.Password, ssh.InsecureIgnoreHostKey())
 
 	// For other authentication methods see ssh.ClientConfig and ssh.AuthMethod
 
