@@ -1,10 +1,9 @@
 #!/bin/bash
 
 CUR_DIR=$(dirname $(readlink -f "$0"))
-PROJECT_DIR=$1
-PROJECT_NAME=$2
-VERSION=$3
-RELEASE=$4
+PROJECT_NAME=fs
+VERSION=$1
+RELEASE=$2
 
 # build rpm
 export PROJECT_NAME=${PROJECT_NAME}
