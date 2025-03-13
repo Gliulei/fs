@@ -26,7 +26,7 @@ var cfgs map[string]*SshConfig
 
 type SshConfig struct {
 	Host        string `mapstructure:"host"`
-	User        string `mapstructure:"user"`
+	User        string `mapstructure:"username"`
 	Password    string `mapstructure:"password"`
 	Port        int    `mapstructure:"port"`
 	UploadDir   string `mapstructure:"upload_dir"`
@@ -92,8 +92,8 @@ func initConfig() {
 
 		// Search config in home directory with name ".fs" (without extension).
 		viper.AddConfigPath(home + "/.fs")
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("fs")
+		viper.SetConfigType("json")
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
