@@ -5,24 +5,42 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"io/ioutil"
+	"os"
+	"sort"
+	"strconv"
 )
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
 	Use:   "show",
 	Short: "查看配置文件",
-	Long: `查看配置文件`,
+	Long:  `查看配置文件`,
 	Run: func(cmd *cobra.Command, args []string) {
-		b0,_ := ioutil.ReadFile(getUsedConfigFile())
-		fmt.Println(fmt.Sprintf("key `%s` is used", string(b0)))
+		usedId, _ := ioutil.ReadFile(getUsedConfigFile())
+		// 提取所有的 key 到一个切片中
+		keys := make([]string, 0, len(cfgs))
+		for k := range cfgs {
+			keys = append(keys, k)
+		}
+		// 对 key 切片进行排序
+		sort.Strings(keys)
 
-		file := viper.ConfigFileUsed()
-		b,_ := ioutil.ReadFile(file)
-		fmt.Println(string(b))
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetAlignment(tablewriter.ALIGN_CENTER)
+		table.SetHeader([]string{"id", "host","port"})
+		for _, key := range keys {
+			cfg := cfgs[key]
+			row := []string{key, cfg.Host, strconv.Itoa(cfg.Port)}
+			if key == string(usedId) {
+				table.Rich(row, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold, tablewriter.BgRedColor}, tablewriter.Colors{tablewriter.Bold, tablewriter.BgRedColor}, tablewriter.Colors{tablewriter.Bold, tablewriter.BgRedColor}})
+			} else {
+				table.Append(row)
+			}
+		}
+		table.Render() // Send output
 	},
 }
 
