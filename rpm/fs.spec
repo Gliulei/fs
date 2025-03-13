@@ -23,7 +23,6 @@ cp -rf $SRC_DIR/fs ${RPM_BUILD_ROOT}/usr/local/bin/fs
 # package infomation
 %files
 # set file attribute here
-%defattr(-,root,root,0755)
 # need not list every file here, keep it as this
 /usr/local/bin/fs
 
