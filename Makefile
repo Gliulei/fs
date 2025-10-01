@@ -7,7 +7,7 @@
 
 # 项目基本信息
 BINARY_NAME := fs
-ORG_PATH    := fs # 替换为你的模块路径，如 github.com/shenyi/fs
+ORG_PATH    := fs # 替换为你的模块路径
 MAIN_PATH   := . # 主包路径
 
 # 版本信息（可通过 git 获取）
