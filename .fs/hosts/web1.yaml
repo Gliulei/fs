@@ -1,0 +1,9 @@
+host: 192.168.1.100
+user: alice
+password: "123456"
+port: 22
+defaultuploaddir: ""
+defaultdownloaddir: ""
+name: web1
+private_key_path: /home/alice/.ssh/id_rsa
+passphrase: ""

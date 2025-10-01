@@ -1,11 +1,10 @@
 /*
 Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
 */
 package main
 
-import "fs/cmd"
+import "fs/internal/command"
 
 func main() {
-	cmd.Execute()
+	command.Execute()
 }

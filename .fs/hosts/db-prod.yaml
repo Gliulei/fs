@@ -1,0 +1,9 @@
+host: 10.0.0.5
+user: root
+password: secret
+port: 22
+defaultuploaddir: /tmp/uploads
+defaultdownloaddir: /tmp/downloads
+name: db-prod
+private_key_path: ""
+passphrase: ""
