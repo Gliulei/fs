@@ -5,6 +5,7 @@ package command
 
 import (
 	"fs/internal/types"
+	"fs/internal/version"
 	"io"
 	"os"
 	"path"
@@ -37,6 +38,8 @@ var rootCmd = &cobra.Command{
 	Long: `fs 是一款专为开发者与运维人员设计的轻量级文件传输工具，旨在替代传统 scp 命令，提供更简洁、高效、智能的跨主机文件操作体验。
 
 无需记忆复杂参数，一键上传下载，支持多环境切换与 Shell 自动补全，大幅提升远程文件管理效率`,
+	Version: version.Version, // 来自 internal/version
+
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
