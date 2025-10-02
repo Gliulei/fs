@@ -51,6 +51,14 @@ func Execute() {
 	}
 }
 
+// 定义需要加载当前选中配置的命令（白名单）
+var requiresSelectedConfig = []*cobra.Command{
+	uploadCmd,
+	downloadCmd,
+	sshCmd,
+	// 添加其他需要当前配置的命令
+}
+
 // init 初始化路径并注册配置加载
 func init() {
 	// 根据环境决定日志格式
@@ -90,18 +98,9 @@ func loadSelectedConfig() {
 		return
 	}
 
-	// 定义不需要执行初始化的命令（可以是命令名或命令指针）
-	skipCommands := map[string]bool{
-		"version":    true,
-		"history":    true,
-		"init":       true,
-		"use":        true,
-		"completion": true,
-		"show":       true,
-	}
-
-	if skipCommands[cmd.Name()] {
-		return // 跳过初始化
+	// 检查当前命令是否需要加载配置
+	if !containsCommand(requiresSelectedConfig, cmd) {
+		return // 不需要，跳过初始化
 	}
 
 	// 1. 读取 current 文件，获取当前选中的主机名
@@ -146,6 +145,16 @@ func loadSelectedConfig() {
 
 	// 可选：打印调试信息
 	// log.Printf("✅ 已加载主机配置: %s (%s@%s:%d)", cfg.Name, cfg.User, cfg.Host, cfg.Port)
+}
+
+// containsCommand 检查 cmd 是否在需要加载配置的命令列表中
+func containsCommand(cmds []*cobra.Command, cmd *cobra.Command) bool {
+	for _, c := range cmds {
+		if c == cmd {
+			return true
+		}
+	}
+	return false
 }
 
 func passThru(r io.Reader, total int64) io.Reader {
