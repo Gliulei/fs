@@ -36,7 +36,7 @@ func applySSHFlags(cmd *cobra.Command) {
 
 	flags.StringVarP(&user, "user", "u", "", "用户名")
 	flags.StringVarP(&password, "password", "p", "", "密码（可选）")
-	flags.StringVarP(&host, "host", "h", "", "服务器地址")
+	flags.StringVarP(&host, "host", "H", "", "服务器地址")
 	flags.IntVarP(&port, "port", "P", 22, "SSH 端口号（默认 22）")
 	flags.StringVarP(&privateKeyPath, "private-key-path", "", "", "私钥路径（可选）")
 	flags.StringVarP(&passphrase, "passphrase", "", "", "私钥密码（可选）")
@@ -52,7 +52,7 @@ var addCmd = &cobra.Command{
 	Long: `将一个新的 SSH 服务器配置添加到本地配置文件中。
 
 	示例：
-	  fs add -n web1 -u alice -h 192.168.1.100 -P 22 -p 123456
+	  fs add -n web1 -u alice -H 192.168.1.100 -P 22 -p 123456
 	  fs add --name db-prod --user root --host 10.0.0.5 --password secret --upload-dir /tmp/uploads --download-dir /tmp/downloads --private-key-path /home/alice/.ssh/id_rsa`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if name == "" {
