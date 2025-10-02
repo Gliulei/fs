@@ -55,8 +55,19 @@ var addCmd = &cobra.Command{
 	  fs add -n web1 -u alice -H 192.168.1.100 -P 22 -p 123456
 	  fs add --name db-prod --user root --host 10.0.0.5 --password secret --upload-dir /tmp/uploads --download-dir /tmp/downloads --private-key-path /home/alice/.ssh/id_rsa`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if name == "" {
-			name = host
+
+		// 获取用户主目录
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatalf("❌ 无法获取用户主目录: %v", err)
+		}
+
+		if uploadDir == "" {
+			uploadDir = fmt.Sprintf("/home/%s/", user)
+		}
+
+		if downloadDir == "" {
+			downloadDir = home
 		}
 
 		config := types.SshConfig{
