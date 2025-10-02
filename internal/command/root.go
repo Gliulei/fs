@@ -97,6 +97,7 @@ func loadSelectedConfig() {
 		"init":       true,
 		"use":        true,
 		"completion": true,
+		"show":       true,
 	}
 
 	if skipCommands[cmd.Name()] {
