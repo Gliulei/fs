@@ -24,9 +24,27 @@ var (
 	uploadDir      string
 	downloadDir    string
 	name           string
+	tags           []string
 	privateKeyPath string
 	passphrase     string
 )
+
+// applySSHFlags 将 SSH 相关的 flags 绑定到指定的 Command 上
+// 可被 add、update 等命令复用
+func applySSHFlags(cmd *cobra.Command) {
+	flags := cmd.Flags()
+
+	flags.StringVarP(&user, "user", "u", "", "用户名")
+	flags.StringVarP(&password, "password", "p", "", "密码（可选）")
+	flags.StringVarP(&host, "host", "H", "", "服务器地址")
+	flags.IntVarP(&port, "port", "P", 22, "SSH 端口号（默认 22）")
+	flags.StringVarP(&privateKeyPath, "private-key-path", "", "", "私钥路径（可选）")
+	flags.StringVarP(&passphrase, "passphrase", "", "", "私钥密码（可选）")
+	flags.StringVarP(&name, "name", "n", "", "服务器名称（用于快速引用）")
+	flags.StringSliceVarP(&tags, "tags", "t", nil, "服务器标签，用空格分隔，如: web db prod")
+	flags.StringVar(&uploadDir, "upload-dir", "", "指定默认上传文件目录")
+	flags.StringVar(&downloadDir, "download-dir", "", "指定默认下载文件目录")
+}
 
 var addCmd = &cobra.Command{
 	Use:   "add",
@@ -49,6 +67,7 @@ var addCmd = &cobra.Command{
 			DefaultUploadDir:   uploadDir,
 			DefaultDownloadDir: downloadDir,
 			Name:               name,
+			Tags:               tags,
 			PrivateKeyPath:     privateKeyPath,
 			Passphrase:         passphrase,
 		}
@@ -83,17 +102,7 @@ var addCmd = &cobra.Command{
 }
 
 func init() {
-	flags := addCmd.Flags()
-
-	flags.StringVarP(&user, "user", "u", "", "用户名（必填）")
-	flags.StringVarP(&password, "password", "p", "", "密码（可选填）")
-	flags.StringVarP(&host, "host", "H", "", "服务器地址（必填）")
-	flags.IntVarP(&port, "port", "P", 22, "SSH 端口号（默认 22）")
-	flags.StringVarP(&privateKeyPath, "private-key-path", "", "", "私钥路径（可选）")
-	flags.StringVarP(&passphrase, "passphrase", "", "", "私钥密码（可选）")
-	flags.StringVarP(&name, "name", "n", "", "服务器名称（用于快速引用，如 web1, db-prod）")
-	flags.StringVar(&uploadDir, "upload-dir", "", "指定默认上传文件目录")
-	flags.StringVar(&downloadDir, "download-dir", "", "指定默认下载文件目录")
+	applySSHFlags(addCmd)
 
 	// 标记必填字段
 	_ = addCmd.MarkFlagRequired("user")

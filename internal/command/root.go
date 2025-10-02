@@ -83,12 +83,31 @@ func init() {
 
 // loadSelectedConfig 加载当前选中的 SSH 配置到全局变量 cfg
 func loadSelectedConfig() {
+	// 获取当前被调用的命令
+	cmd, _, err := rootCmd.Find(os.Args[1:])
+	if err != nil {
+		// 处理错误（可选）
+		return
+	}
+
+	// 定义不需要执行初始化的命令（可以是命令名或命令指针）
+	skipCommands := map[string]bool{
+		"version":    true,
+		"history":    true,
+		"init":       true,
+		"use":        true,
+		"completion": true,
+	}
+
+	if skipCommands[cmd.Name()] {
+		return // 跳过初始化
+	}
+
 	// 1. 读取 current 文件，获取当前选中的主机名
 	currentFile := getUsedConfigFile()
 	data, err := os.ReadFile(currentFile)
 	if err != nil {
-		// log.Fatalf("❌ 未找到当前选中的主机配置，请先使用 'fs use <name>' 进行设置: %v", err)
-		return
+		log.Fatalf("❌ 未找到当前选中的主机配置，请先使用 'fs use <name>' 进行设置: %v", err)
 	}
 
 	name := strings.TrimSpace(string(data))
