@@ -8,7 +8,7 @@
 # 项目基本信息
 BINARY_NAME := fs
 ORG_PATH    := fs # 模块路径与go.mod中定义的一致
-MAIN_PATH   := cmd/fs # 主程序入口路径
+MAIN_PATH   := cmd/fs/main.go # 主程序入口路径
 
 # 版本信息（可通过 git 获取）
 VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo "dev")
@@ -27,11 +27,14 @@ PLATFORMS := \
 	windows-amd64 \
 	windows-arm64
 
+# 打包目标
+ARCHIVE_TARGETS := $(addprefix dist/,$(addsuffix .tar.gz,$(PLATFORMS)))
+
 # =============================================
 # 默认目标
 # =============================================
 
-.PHONY: all build clean dist clean-dist
+.PHONY: all build clean dist clean-dist archive
 
 all: build
 
@@ -61,9 +64,21 @@ $(addprefix dist/,$(addsuffix /${BINARY_NAME},$(PLATFORMS))): dist/%/${BINARY_NA
 	GOARCH=$(word 2, $(subst -, ,$*)) \
 	CGO_ENABLED=0 \
 	go build \
-	-ldflags="-s -w -X '${ORG_PATH}/internal/version.Version=${VERSION}' -X '${ORG_PATH}/internal/version.Commit=${COMMIT}' -X '${ORG_PATH}/internal/version.Date=${DATE}'" \
+	-ldflags="-X \"${ORG_PATH}/internal/version.Version=${VERSION}\" -X \"${ORG_PATH}/internal/version.Commit=${COMMIT}\" -X \"${ORG_PATH}/internal/version.Date=${DATE}\"" \
 	-o $@ ${MAIN_PATH}
 	@echo "✅ 构建完成: $@"
+
+# =============================================
+# 打包成 tar.gz
+# =============================================
+
+archive: dist $(ARCHIVE_TARGETS)
+	@echo "📦 所有平台打包完成！产物在 ./${DIST_DIR}/"
+
+# 定义每个平台的打包规则
+$(ARCHIVE_TARGETS): dist/%.tar.gz : dist/%/${BINARY_NAME}
+	@tar -czf $@ -C $(dir $<) .
+	@echo "📦 打包完成: $@"
 
 # =============================================
 # 快捷构建单个平台（可选）
@@ -73,25 +88,25 @@ $(addprefix dist/,$(addsuffix /${BINARY_NAME},$(PLATFORMS))): dist/%/${BINARY_NA
 
 linux:
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
-	-ldflags="-s -w -X '${ORG_PATH}/internal/version.Version=${VERSION}' -X '${ORG_PATH}/internal/version.Commit=${COMMIT}' -X '${ORG_PATH}/internal/version.Date=${DATE}'" \
+	-ldflags="-X \"${ORG_PATH}/internal/version.Version=${VERSION}\" -X \"${ORG_PATH}/internal/version.Commit=${COMMIT}\" -X \"${ORG_PATH}/internal/version.Date=${DATE}\"" \
 	-o ${BINARY_NAME}-linux-amd64 ${MAIN_PATH}
 	@echo "✅ 构建完成: ./${BINARY_NAME}-linux-amd64"
 
 mac:
 	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build \
-	-ldflags="-s -w -X '${ORG_PATH}/internal/version.Version=${VERSION}' -X '${ORG_PATH}/internal/version.Commit=${COMMIT}' -X '${ORG_PATH}/internal/version.Date=${DATE}'" \
+	-ldflags="-X \"${ORG_PATH}/internal/version.Version=${VERSION}\" -X \"${ORG_PATH}/internal/version.Commit=${COMMIT}\" -X \"${ORG_PATH}/internal/version.Date=${DATE}\"" \
 	-o ${BINARY_NAME}-darwin-amd64 ${MAIN_PATH}
 	@echo "✅ 构建完成: ./${BINARY_NAME}-darwin-amd64"
 
 mac-arm64:
 	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build \
-	-ldflags="-s -w -X '${ORG_PATH}/internal/version.Version=${VERSION}' -X '${ORG_PATH}/internal/version.Commit=${COMMIT}' -X '${ORG_PATH}/internal/version.Date=${DATE}'" \
+	-ldflags="-X \"${ORG_PATH}/internal/version.Version=${VERSION}\" -X \"${ORG_PATH}/internal/version.Commit=${COMMIT}\" -X \"${ORG_PATH}/internal/version.Date=${DATE}\"" \
 	-o ${BINARY_NAME}-darwin-arm64 ${MAIN_PATH}
 	@echo "✅ 构建完成: ./${BINARY_NAME}-darwin-arm64"
 
 windows:
 	@GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
-	-ldflags="-s -w -X '${ORG_PATH}/internal/version.Version=${VERSION}' -X '${ORG_PATH}/internal/version.Commit=${COMMIT}' -X '${ORG_PATH}/internal/version.Date=${DATE}'" \
+	-ldflags="-X \"${ORG_PATH}/internal/version.Version=${VERSION}\" -X \"${ORG_PATH}/internal/version.Commit=${COMMIT}\" -X \"${ORG_PATH}/internal/version.Date=${DATE}\"" \
 	-o ${BINARY_NAME}-windows-amd64.exe ${MAIN_PATH}
 	@echo "✅ 构建完成: ./${BINARY_NAME}-windows-amd64.exe"
 
@@ -101,7 +116,8 @@ windows:
 
 clean:
 	rm -f ${BINARY_NAME} ${BINARY_NAME}-*
-	@echo "🧹 已清理构建产物"
+	rm -rf ${DIST_DIR}
+	@echo "🧹 已清理构建产物和打包目录"
 
 # =============================================
 # 工具：查看版本
