@@ -5,12 +5,12 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/bramvdbogaerde/go-scp v1.2.0
+	github.com/bramvdbogaerde/go-scp v1.5.0
 	github.com/cheggaaa/pb/v3 v3.1.0
 	github.com/ngaut/log v0.0.0-20210830112240-0124ec040aeb
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/crypto v0.18.0
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/subosito/gotenv v1.3.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.35.0 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0 // indirect

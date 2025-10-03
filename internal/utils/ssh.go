@@ -101,7 +101,9 @@ func EstablishScpClient(cfg *types.SshConfig) (scp.Client, error) {
 		clientConfig, err = auth.PasswordKey(cfg.User, cfg.Password, ssh.InsecureIgnoreHostKey())
 	}
 
-	// For other authentication methods see ssh.ClientConfig and ssh.AuthMethod
+	if err != nil {
+		return scp.Client{}, fmt.Errorf("❌ 创建SSH客户端配置失败: %v", err)
+	}
 
 	// Create a new SCP client
 	client := scp.NewClient(fmt.Sprintf("%s:%d", cfg.Host, cfg.Port), &clientConfig)
@@ -109,7 +111,7 @@ func EstablishScpClient(cfg *types.SshConfig) (scp.Client, error) {
 	// Connect to the remote server
 	err = client.Connect()
 	if err != nil {
-		fmt.Println("Couldn't establish a connection to the remote server ", err)
+		return client, fmt.Errorf("❌ 无法连接到远程服务器: %v", err)
 	}
 
 	return client, nil
