@@ -7,7 +7,7 @@
 
 # 项目基本信息
 BINARY_NAME := fs
-ORG_PATH    := fs # 模块路径与go.mod中定义的一致
+ORG_PATH    := fs# 模块路径与go.mod中定义的一致
 MAIN_PATH   := cmd/fs/main.go # 主程序入口路径
 
 # 版本信息（可通过 git 获取）
@@ -57,14 +57,15 @@ clean-dist:
 	rm -rf ${DIST_DIR}
 	@echo "🧹 已清理 ${DIST_DIR}/"
 
-# 定义每个平台的构建规则
-$(addprefix dist/,$(addsuffix /${BINARY_NAME},$(PLATFORMS))): dist/%/${BINARY_NAME}
+# ✅ 正确的模式规则
+dist/%/$(BINARY_NAME): $(MAIN_PATH)
+	@echo "🏗️  构建目标: $@"
 	@mkdir -p $(dir $@)
 	@GOOS=$(word 1, $(subst -, ,$*)) \
 	GOARCH=$(word 2, $(subst -, ,$*)) \
 	CGO_ENABLED=0 \
 	go build \
-	-ldflags="-X \"${ORG_PATH}/internal/version.Version=${VERSION}\" -X \"${ORG_PATH}/internal/version.Commit=${COMMIT}\" -X \"${ORG_PATH}/internal/version.Date=${DATE}\"" \
+	-ldflags="-X '${ORG_PATH}/internal/version.Version=${VERSION}' -X '${ORG_PATH}/internal/version.Commit=${COMMIT}' -X '${ORG_PATH}/internal/version.Date=${DATE}'" \
 	-o $@ ${MAIN_PATH}
 	@echo "✅ 构建完成: $@"
 
