@@ -7,8 +7,8 @@
 
 # 项目基本信息
 BINARY_NAME := fs
-ORG_PATH    := fs # 替换为你的模块路径
-MAIN_PATH   := . # 主包路径
+ORG_PATH    := fs # 模块路径与go.mod中定义的一致
+MAIN_PATH   := cmd/fs # 主程序入口路径
 
 # 版本信息（可通过 git 获取）
 VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo "dev")
