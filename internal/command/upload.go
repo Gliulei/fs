@@ -134,9 +134,9 @@ var uploadCmd = &cobra.Command{
 					log.Errorf("🟡 打开文件失败: %s: %v", srcFile, err)
 					continue
 				}
+				defer f.Close()
 
 				err = client.CopyFromFilePassThru(context.Background(), *f, fullRemotePath, chmod, passThru)
-				f.Close()
 
 				if err != nil {
 					log.Errorf("❌ 上传失败 (%s): %s → %s: %v", targetCfg.Name, srcFile, fullRemotePath, err)

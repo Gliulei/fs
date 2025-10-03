@@ -96,7 +96,11 @@ func EstablishScpClient(cfg *types.SshConfig) (scp.Client, error) {
 	var clientConfig ssh.ClientConfig
 	var err error
 	if cfg.PrivateKeyPath != "" {
-		clientConfig, err = auth.PrivateKeyWithPassphrase(cfg.User, []byte(cfg.Passphrase), cfg.PrivateKeyPath, ssh.InsecureIgnoreHostKey())
+		if cfg.Passphrase != "" {
+			clientConfig, err = auth.PrivateKeyWithPassphrase(cfg.User, []byte(cfg.Passphrase), cfg.PrivateKeyPath, ssh.InsecureIgnoreHostKey())
+		} else {
+			clientConfig, err = auth.PrivateKey(cfg.User, cfg.PrivateKeyPath, ssh.InsecureIgnoreHostKey())
+		}
 	} else {
 		clientConfig, err = auth.PasswordKey(cfg.User, cfg.Password, ssh.InsecureIgnoreHostKey())
 	}
