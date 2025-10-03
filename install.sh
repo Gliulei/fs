@@ -1,111 +1,242 @@
 #!/bin/bash
 # ==============================================================================
-# 一键安装脚本 - 用于通过 curl | bash 方式安装软件
-# 示例用法: curl -fsSL https://example.com/install | bash
-# 
-# 作者: 通义千问
-# 注意: 请将下方的占位符替换为你的实际软件信息。
+# fs 一键安装脚本
+# 支持: Linux, macOS, Windows (Git Bash / MSYS2 / WSL)
+# 所有平台均使用 .tar.gz 发布包
+# 安装路径: $HOME/.fs
+# 用法: curl -fsSL https://example.com/install.sh | bash
 # ==============================================================================
 
-# -----------------------------
-# 🔧 配置区域 - 必须修改!
-# -----------------------------
-
-# 软件名称 (用于显示)
-SOFTWARE_NAME="MyAwesomeApp"
-
-# 软件的下载URL (请替换为你的实际下载链接)
-SOFTWARE_DOWNLOAD_URL="https://example.com/releases/myapp-latest-linux-x64.tar.gz"
-
-# 下载后的文件名
-ARCHIVE_NAME="myapp.tar.gz"
-
-# 解压后的主目录名
-EXTRACTED_DIR="myapp"
-
-# 安装的目标路径 (通常为 /usr/local 或 /opt)
-INSTALL_PREFIX="/usr/local"
-
-# 软件二进制文件的相对路径 (相对于 EXTRACTED_DIR)
-BINARY_PATH="bin/myapp"
-
-# -----------------------------
-# 🚀 脚本逻辑
-# -----------------------------
-
-# 设置严格模式: 遇错退出, 未定义变量报错, 管道错误被捕获
 set -euo pipefail
+IFS=$'\n\t'
 
-# 检查是否在管道中运行 (curl | bash)
-if [ ! -t 0 ]; then
-    echo "💡 检测到通过 'curl | bash' 方式安装，开始执行..."
-fi
+# -----------------------------
+# 🔧 配置区域
+# -----------------------------
 
-# 函数: 打印彩色信息
+SOFTWARE_NAME="fs"
+GITHUB_REPO="liulei152/fs"
+DEFAULT_VERSION="1.1.0"
+
+FS_ROOT="${HOME}/.fs"
+BIN_DIR="${FS_ROOT}/bin"
+AUTO_CONFIG_SHELL=true
+
+# 临时目录（退出时清理）
+TEMP_DIR=""
+
+# -----------------------------
+# 🎨 输出函数
+# -----------------------------
+
 info() {
-    echo -e "\033[1;34mINFO:\033[0m $*"
+    printf '\033[1;34m[i]\033[0m %s\n' "$*"
 }
 
 success() {
-    echo -e "\033[1;32mSUCCESS:\033[0m $*"
+    printf '\033[1;32m[✓]\033[0m %s\n' "$*"
 }
 
 error() {
-    echo -e "\033[1;31mERROR:\033[0m $*" >&2
+    printf '\033[1;31m[✗]\033[0m %s\n' "$*" >&2
+    cleanup
     exit 1
 }
 
-# 检查必要工具
-for cmd in curl tar; do
-    if ! command -v $cmd &> /dev/null; then
-        error "缺少必要命令 '$cmd'，请先安装。"
+warn() {
+    printf '\033[1;33m[!]\033[0m %s\n' "$*"
+}
+
+# -----------------------------
+# 🧹 清理函数
+# -----------------------------
+
+cleanup() {
+    if [ -n "${TEMP_DIR:-}" ] && [ -d "$TEMP_DIR" ]; then
+        info "🧹 清理临时文件..."
+        rm -rf "$TEMP_DIR"
     fi
-done
+}
 
-# 创建临时目录
-TMP_DIR=$(mktemp -d)
-info "创建临时目录: $TMP_DIR"
-cd "$TMP_DIR"
+# -----------------------------
+# 🖥️ 系统探测函数
+# -----------------------------
 
-# 下载软件
-info "正在下载 $SOFTWARE_NAME..."
-curl -fL -o "$ARCHIVE_NAME" "$SOFTWARE_DOWNLOAD_URL" || error "下载失败"
+get_os() {
+    local os
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    case "$os" in
+        linux*)   echo "linux" ;;
+        darwin*)  echo "darwin" ;;
+        mingw*|cygwin*) echo "windows" ;;
+        *)        error "不支持的操作系统: $os" ;;
+    esac
+}
 
-success "下载成功!"
+get_arch() {
+    local arch
+    arch=$(uname -m | tr '[:upper:]' '[:lower:]')
+    case "$arch" in
+        x86_64|amd64)   echo "amd64" ;;
+        aarch64|arm64)  echo "arm64" ;;
+        i?86|x86)       echo "386" ;;
+        armv*)          echo "arm" ;;
+        *)              error "不支持的架构: $arch" ;;
+    esac
+}
 
-# 解压
-info "正在解压..."
-tar -xzf "$ARCHIVE_NAME" || error "解压失败"
+# -----------------------------
+# 🐚 配置 Shell 环境（bash/zsh/fish）
+# -----------------------------
 
-# 安装到目标位置
-TARGET_DIR="$INSTALL_PREFIX/$EXTRACTED_DIR"
-info "正在安装到 $TARGET_DIR..."
-sudo rm -rf "$TARGET_DIR" 2>/dev/null || true
-sudo mkdir -p "$INSTALL_PREFIX"
-sudo mv "$EXTRACTED_DIR" "$TARGET_DIR"
+configure_shell() {
+    local shell_rc=""
+    local shell_name=$(basename "${SHELL:-unknown}")
 
-# 创建全局符号链接
-BIN_SOURCE="$TARGET_DIR/$BINARY_PATH"
-BIN_TARGET="/usr/local/bin/$(basename "$BINARY_PATH")"
-info "创建全局命令链接: $BIN_TARGET"
-sudo ln -sf "$BIN_SOURCE" "$BIN_TARGET"
+    case "$shell_name" in
+        "bash")
+            shell_rc="${HOME}/.bashrc"
+            ;;
+        "zsh")
+            shell_rc="${HOME}/.zshrc"
+            ;;
+        "fish")
+            local fish_conf="${HOME}/.config/fish/config.fish"
+            mkdir -p "$(dirname "$fish_conf")"
+            if ! grep -qF '# fs shell setup' "$fish_conf" 2>/dev/null; then
+                {
+                    echo ""
+                    echo "# fs shell setup"
+                    echo "set -gx PATH \"\$HOME/.fs/bin\" \$PATH"
+                    echo "# fs end"
+                } >> "$fish_conf"
+                success "已为 fish 配置 PATH"
+            fi
+            return
+            ;;
+        *)
+            warn "未知 shell: $shell_name，跳过自动配置"
+            return
+            ;;
+    esac
 
-# 清理
-info "清理临时文件..."
-cd /
-sudo rm -rf "$TMP_DIR"
+    local marker="# fs shell setup (auto generated)"
+    local export_line="export PATH=\"\$HOME/.fs/bin:\$PATH\""
 
-# 完成
-success "$SOFTWARE_NAME 安装成功!"
-echo ""
-echo "🎉 你现在可以运行: $(basename "$BINARY_PATH")"
-echo "📖 查看文档: https://example.com/docs"
-echo ""
+    if [ ! -f "$shell_rc" ]; then
+        touch "$shell_rc"
+    fi
 
-# 可选: 验证安装
-if command -v "$(basename "$BINARY_PATH")" &> /dev/null; then
-    version=$("$(basename "$BINARY_PATH")" --version 2>&1 | head -n1)
-    echo "✅ 版本: $version"
-else
-    echo "⚠️  如果命令未生效，请尝试重新打开终端或运行: hash -r"
+    if grep -qF "$marker" "$shell_rc" 2>/dev/null; then
+        info "Shell 已配置，跳过。"
+        return
+    fi
+
+    info "配置 $shell_rc 以添加 PATH..."
+
+    {
+        echo ""
+        echo "$marker"
+        echo "$export_line"
+        echo "# fs end"
+    } >> "$shell_rc"
+
+    success "已配置 $shell_rc"
+}
+
+# -----------------------------
+# 🚀 主安装逻辑
+# -----------------------------
+
+main() {
+    local version="${1:-$DEFAULT_VERSION}"
+    local os=$(get_os)
+    local arch=$(get_arch)
+
+    # ✅ 所有平台都使用 .tar.gz
+    local archive_name="${os}-${arch}.tar.gz"
+    local url="https://gitee.com/${GITHUB_REPO}/releases/download/v${version}/${archive_name}"
+
+    info "准备安装 ${SOFTWARE_NAME} v${version}"
+    info "平台: ${os}/${arch}"
+    info "下载: ${url}"
+
+    # 创建临时目录
+    TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t fs-install)
+    info "使用临时目录: $TEMP_DIR"
+    cd "$TEMP_DIR"
+
+    # 下载 .tar.gz
+    info "📥 正在下载..."
+    if command -v wget >/dev/null 2>&1; then
+        wget -q --show-progress -O "fs.tar.gz" "$url" || \
+            wget -q -O "fs.tar.gz" "$url"
+    elif command -v curl >/dev/null 2>&1; then
+        curl -f# -L -o "fs.tar.gz" "$url"
+    else
+        error "需要 curl 或 wget"
+    fi
+
+    # 创建安装目录
+    info "🔧 创建安装目录: $BIN_DIR"
+    mkdir -p "$BIN_DIR"
+
+    # ✅ 解压 .tar.gz（所有平台通用）
+    info "📦 解压 fs.tar.gz..."
+    tar -xzf "fs.tar.gz" -C "$FS_ROOT" || error "解压失败"
+
+    # ✅ 判断是否为 Windows 平台，决定二进制名
+    local expected_binary="fs"
+    if [ "$os" = "windows" ]; then
+        expected_binary="fs.exe"
+    fi
+
+    # 检查解压后的二进制是否存在
+    if [ ! -f "$FS_ROOT/$expected_binary" ]; then
+        error "未找到二进制文件: $FS_ROOT/$expected_binary，请检查发布包内容"
+    fi
+
+    # 移动到 bin 目录（保持统一名称）
+    mv "$FS_ROOT/$expected_binary" "$BIN_DIR/fs" || error "移动二进制失败"
+    chmod +x "$BIN_DIR/fs"
+
+    # 配置 shell
+    if [ "$AUTO_CONFIG_SHELL" = true ]; then
+        configure_shell
+    fi
+
+    # 清理
+    cleanup
+
+    # 完成
+    success "${SOFTWARE_NAME} v${version} 安装成功！"
+    echo
+    echo "🎉 使用方式: fs --help"
+    echo "💡 如果命令未生效，请运行: source ~/.bashrc 或重启终端"
+    echo "📖 项目地址: https://gitee.com/liulei152/fs"
+    echo
+
+    # 验证
+    if command -v fs >/dev/null 2>&1; then
+        local ver
+        ver=$(fs --version 2>&1 | head -n1)
+        success "版本: $ver"
+    else
+        warn "建议重启终端或运行: source ~/.profile"
+    fi
+}
+
+# -----------------------------
+# 🏁 入口点
+# -----------------------------
+
+# 检测 'curl | bash'
+if [ ! -t 0 ]; then
+    info "检测到 'curl | bash' 安装模式"
 fi
+
+# 注册清理函数
+trap cleanup EXIT
+
+# 执行
+main "$@"
