@@ -16,7 +16,7 @@ IFS=$'\n\t'
 
 SOFTWARE_NAME="fs"
 GITHUB_REPO="liulei152/fs"
-DEFAULT_VERSION="1.1.0"
+DEFAULT_VERSION="1.0.0"
 
 FS_ROOT="${HOME}/.fs"
 BIN_DIR="${FS_ROOT}/bin"
@@ -123,23 +123,36 @@ configure_shell() {
     local marker="# fs shell setup (auto generated)"
     local export_line="export PATH=\"\$HOME/.fs/bin:\$PATH\""
 
-    if [ ! -f "$shell_rc" ]; then
-        touch "$shell_rc"
-    fi
+
+    # 确保文件存在
+    [ -f "$shell_rc" ] || touch "$shell_rc"
 
     if grep -qF "$marker" "$shell_rc" 2>/dev/null; then
         info "Shell 已配置，跳过。"
         return
     fi
 
+
+    # 检查是否可写
+    if [ ! -w "$shell_rc" ]; then
+        error "$shell_rc 不可写，请运行：chmod u+w '$shell_rc'"
+        exit 1
+    fi
+
+
     info "配置 $shell_rc 以添加 PATH..."
 
-    {
+    # 再执行写入
+    if ! {
         echo ""
         echo "$marker"
         echo "$export_line"
         echo "# fs end"
-    } >> "$shell_rc"
+    } >> "$shell_rc"; then
+        error "写入 $shell_rc 失败（未知错误）。请手动添加以下行到该文件："
+        error "  export PATH=\"\$HOME/.fs/bin:\$PATH\""
+        exit 1
+    fi
 
     success "已配置 $shell_rc"
 }
