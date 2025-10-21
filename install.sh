@@ -2,7 +2,7 @@
 # ==============================================================================
 # fs 一键安装脚本
 # 支持: Linux, macOS, Windows (Git Bash / MSYS2 / WSL)
-# 所有平台均使用 .tar.gz 发布包1
+# 所有平台均使用 .tar.gz 发布包
 # 安装路径: $HOME/.fs
 # 用法: curl -fsSL https://example.com/install.sh | bash
 # ==============================================================================
@@ -145,6 +145,38 @@ configure_shell() {
 }
 
 # -----------------------------
+# 💡 智能提示函数（核心优化）
+# -----------------------------
+
+show_post_install_tip() {
+    local shell_name
+    shell_name=$(basename "${SHELL:-unknown}" 2>/dev/null || echo "unknown")
+    local config_file=""
+
+    case "$shell_name" in
+        bash)
+            config_file="$HOME/.bashrc"
+            ;;
+        zsh)
+            config_file="$HOME/.zshrc"
+            ;;
+        fish)
+            config_file="$HOME/.config/fish/config.fish"
+            ;;
+        *)
+            # 通用 fallback（适用于 dash, sh 等）
+            config_file="$HOME/.profile"
+            ;;
+    esac
+
+    if [ -n "$config_file" ]; then
+        echo "💡 如果命令未生效，请运行: source $config_file"
+    else
+        echo "💡 如果命令未生效，请重启终端或手动将 \$HOME/.fs/bin 加入 PATH"
+    fi
+}
+
+# -----------------------------
 # 🚀 主安装逻辑
 # -----------------------------
 
@@ -212,7 +244,7 @@ main() {
     success "${SOFTWARE_NAME} v${version} 安装成功！"
     echo
     echo "🎉 使用方式: fs --help"
-    echo "💡 如果命令未生效，请运行: source ~/.bashrc 或重启终端"
+    show_post_install_tip  # ← 核心优化：动态提示
     echo "📖 项目地址: https://gitee.com/liulei152/fs"
     echo
 
