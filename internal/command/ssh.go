@@ -125,7 +125,7 @@ var sshCmd = &cobra.Command{
 		}
 
 		// 7. 开始远程会话
-		err = session.Shell()
+		err = session.Start("exec /bin/bash -l")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "❌ 启动远程 shell 失败: %v\n", err)
 			os.Exit(1)
