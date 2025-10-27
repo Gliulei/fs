@@ -16,7 +16,7 @@ IFS=$'\n\t'
 
 SOFTWARE_NAME="fs"
 GITHUB_REPO="liulei152/fs"
-DEFAULT_VERSION="1.0.0"
+DEFAULT_VERSION="1.0.1"
 
 FS_ROOT="${HOME}/.fs"
 BIN_DIR="${FS_ROOT}/bin"
