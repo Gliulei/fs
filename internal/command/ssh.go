@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"fs/internal/utils"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -119,15 +117,16 @@ var sshCmd = &cobra.Command{
 		}
 
 		// 监听窗口大小变化
-		sigc := make(chan os.Signal, 1)
-		signal.Notify(sigc, syscall.SIGWINCH)
-		go func() {
-			for range sigc {
-				if w, h, err := term.GetSize(fd); err == nil {
-					_ = session.WindowChange(h, w)
-				}
-			}
-		}()
+		// sigc := make(chan os.Signal, 1)
+		// signal.Notify(sigc, syscall.SIGWINCH)
+		// go func() {
+		// 	for range sigc {
+		// 		if w, h, err := term.GetSize(fd); err == nil {
+		// 			_ = session.WindowChange(h, w)
+		// 		}
+		// 	}
+		// }()
+		initWindowListener(fd, session)
 
 		// 启动交互式 shell（推荐用 Shell()）
 		if err := session.Shell(); err != nil {
