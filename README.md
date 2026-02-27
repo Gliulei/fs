@@ -1,107 +1,157 @@
-# 📁 fs — 端到端高效文件传输工具
+# 📁 fs - File Sync Tool
 
-> ⚡ 轻量级命令行文件同步工具，让 `scp` 成为过去式
+<div align="center">
 
-`fs` 是一款专为开发者与运维人员设计的轻量级文件传输工具，旨在替代传统 `scp` 命令，提供更简洁、高效、智能的跨主机文件操作体验。
+**English** | [中文](./README_zh.md)
 
-无需记忆复杂参数，一键上传下载，支持多环境切换与 Shell 自动补全，大幅提升远程文件管理效率。
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.24-blue.svg)](https://golang.org/)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/yourusername/fs/actions)
+
+</div>
+
+## Introduction
+
+> ⚡ Lightweight command-line tool for SSH server management and file synchronization that makes `scp` and manual SSH management obsolete
+
+`fs` is a comprehensive command-line tool designed for developers and DevOps engineers, providing an integrated solution for SSH server management and file transfer operations. It aims to replace traditional `scp` commands and manual SSH management with a more concise, efficient, and intelligent cross-host operations experience.
+
+Forget complex parameters and manual server management - add, configure, and connect to SSH servers with simple commands, support multi-environment switching, file upload/download, and shell auto-completion, significantly improving remote server management efficiency.
 
 ---
 
-## ✨ 特性
+##✨ Features
 
-- ✅ **简洁语法**：无需记忆复杂参数，一键完成本地与远程主机间的文件拷贝。
-- ✅ **高效传输**：基于 SSH 协议优化数据流，支持压缩传输，显著提升速度。
-- ✅ **智能补全**：支持 Bash / Zsh 自动补全，自动识别主机组和路径，减少输入错误。
-- ✅ **跨平台支持**：兼容 Linux、macOS、WSL 及 Windows PowerShell。
-- ✅ **多环境管理**：通过 `fs use <group>` 快速切换开发、测试、生产等服务器组。
-- ✅ **操作可追溯**：自动记录命令历史，便于审计与复用。
+- ✅ **SSH Server Management**: Add, configure, and manage multiple SSH server connections with simple commands
+- ✅ **One-click File Transfer**: No need to remember complex parameters, complete local-to-remote file copying with one click
+- ✅ **Efficient Transfer**: SSH protocol optimized data stream, supports compression transfer, significantly improves speed
+- ✅ **Smart Completion**: Supports Bash/Zsh auto-completion, automatically recognizes host groups and paths, reduces input errors
+-✅ **Cross-platform Support**: Compatible with Linux, macOS, WSL, and Windows PowerShell
+- ✅ **Multi-environment Management**: Quickly switch between development, testing, and production server groups via `fs use <group>`
+- ✅ **Direct SSH Connection**: Connect directly to configured servers with `fs ssh`
+- ✅ **Operation Traceability**: Automatically records command history for auditing and reuse
+- ✅ **Configuration Packaging & Import**: Supports packaging and batch import of configuration files for environment migration and team collaboration
 
 ---
 
-## 📦 安装
+## 📦 Installation
 
-### 自动化安装（推荐）
+### Automated Installation (Recommended)
 
-#### Linux / macOS（Bash / Zsh）
+#### Linux / macOS (Bash / Zsh)
 
 ```bash
-# 建议安装前清空可能冲突的环境变量
+# It's recommended to clear potentially conflicting environment variables before installation
 unset GOROOT GOBIN GOPATH
 
-# 下载并执行安装脚本
+# Download and execute installation script
 curl -sSL https://gitee.com/liulei152/fs/raw/master/install.sh | bash
 
-# 可选：避免别名冲突（如已存在 'fs' 别名）
+# Optional: Avoid alias conflicts (if 'fs' alias already exists)
 cat << 'EOF' >> ~/.bashrc
 if [[ -n $(alias fs 2>/dev/null) ]]; then
     unalias fs
 fi
 EOF
 
-# 加载 fs 环境变量
+# Load fs environment variables
 source "$HOME/.fs/env"
 ```
 
-#### Windows（PowerShell）
+#### Windows (PowerShell)
 
 ```powershell
 iwr https://gitee.com/liulei152/fs/raw/master/install.ps1 -UseBasicParsing | iex
 ```
 
-### 手动安装
+### Manual Installation
 
 ```bash
 tar -xzf fs-linux-amd64.tar.gz
 sudo mv fs /usr/local/bin/
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-只需几个命令，即可上手使用。
+Get started with server management and file operations in just a few commands.
 
-### 1. 初始化配置
+### 1. Initialize Configuration
 
 ```bash
 fs init
 ```
-### 2. 文件传输
 
-上传文件到远程主机：
+### 2. SSH Server Management
+
 ```bash
-fs upload filename
+# Add a new SSH server
+fs add --name web1 --user alice --host 192.168.1.100 --port 22
+
+# View all configured servers
+fs show
+
+# Switch default server
+fs use web1
+
+# Connect directly via SSH
+fs ssh
 ```
 
-下载文件到本地：
+### 3. File Transfer Operations
 
 ```bash
+# Upload files to remote server
+fs upload filename
+
+# Download files from remote server
 fs download filename
 ```
-### 3. 切换主机组（分组）
 
-支持多环境快速切换：
+### 4. Configuration Management
 
 ```bash
-fs use group
-```
+# Package all configurations for backup/team sharing
+fs archive
 
-📌 示例：
+# Package to specified file
+fs archive --output my-configs.tar.gz
 
-```
-fs use production   # 切换到生产环境
-fs use staging      # 切换到测试环境
+# Preview package contents
+fs import config-archive.tar.gz --preview
+
+# Import configuration (interactive conflict handling)
+fs import config-archive.tar.gz
+
+# Force overwrite import
+fs import config-archive.tar.gz --force
+
+# Skip existing configurations
+fs import config-archive.tar.gz --skip-existing
 ```
 
 ---
 
+##🧭 Roadmap
 
+- [x] Add find functionality in current directory for file upload
+- [x] Record command history
+- [x] Configuration addition
+- [x] SHELL Zsh/Bash auto-completion
+- [x] Configuration deletion
+- [ ] Multi-file download/upload
 
-## 🧭 路线图（ROADMAP）
+## 📞 Contact
 
-+ [x] 上传文件加个在当前目录下find
-+ [x] 记录命令历史
-+ [x] 配置增加
-+ [x] SHELL Zsh|Bash 自动补全
-+ [ ] 实现类似scp /home/space/music/ root@www.runoob.com:/home/root/others/功能，自动记忆
-+ [ ] 配置删除
-+ [ ] 多文件下载|上传
+For questions or feedback, please contact:
+
+- **Name**: shenyi
+- **Email**: 1245332635@qq.com
+- **GitHub**: [Your GitHub Profile](https://github.com/yourusername)
+
+##🤝uting
+
+Contributions are welcome! Please feel free to submit pull requests or open issues.
+
+##📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
