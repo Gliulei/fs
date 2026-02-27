@@ -6,9 +6,9 @@ package command
 import (
 	"fmt"
 	"fs/internal/utils"
-	"io"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -88,73 +88,58 @@ var sshCmd = &cobra.Command{
 		}
 		defer session.Close()
 
-		// 5. 将标准输入/输出/错误绑定到远程会话
-		stdin, err := session.StdinPipe()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "❌ 无法获取 stdin 管道: %v\n", err)
-			os.Exit(1)
-		}
+		// === 关键：直接绑定标准流，不要用 Pipe ===
+		session.Stdin = os.Stdin
+		session.Stdout = os.Stdout
+		session.Stderr = os.Stderr
 
-		stdout, err := session.StdoutPipe()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "❌ 无法获取 stdout 管道: %v\n", err)
-			os.Exit(1)
-		}
-
-		stderr, err := session.StderrPipe()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "❌ 无法获取 stderr 管道: %v\n", err)
-			os.Exit(1)
-		}
-
-		// 6. 请求伪终端（PTY）
-		modes := ssh.TerminalModes{
-			ssh.ECHO:          1,     // 启用回显
-			ssh.TTY_OP_ISPEED: 14400, // 输入速率
-			ssh.TTY_OP_OSPEED: 14400, // 输出速率
-		}
-
-		// 获取本地终端尺寸
+		// 设置本地终端为 raw 模式
 		fd := int(os.Stdin.Fd())
-		width, height, _ := term.GetSize(fd)
-
-		err = session.RequestPty("xterm", height, width, modes)
+		oldState, err := term.MakeRaw(fd)
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "❌ 设置 raw 模式失败: %v\n", err)
+			os.Exit(1)
+		}
+		defer term.Restore(fd, oldState)
+
+		// 获取终端尺寸
+		width, height, _ := term.GetSize(fd)
+		termType := os.Getenv("TERM")
+		if termType == "" {
+			termType = "xterm-256color"
+		}
+		modes := ssh.TerminalModes{
+			ssh.ECHO:          1,
+			ssh.TTY_OP_ISPEED: 14400,
+			ssh.TTY_OP_OSPEED: 14400,
+		}
+		if err := session.RequestPty(termType, height, width, modes); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ 请求 PTY 失败: %v\n", err)
 			os.Exit(1)
 		}
 
-		// 7. 开始远程会话
-		err = session.Start("exec /bin/bash -l")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "❌ 启动远程 shell 失败: %v\n", err)
+		// 监听窗口大小变化
+		sigc := make(chan os.Signal, 1)
+		signal.Notify(sigc, syscall.SIGWINCH)
+		go func() {
+			for range sigc {
+				if w, h, err := term.GetSize(fd); err == nil {
+					_ = session.WindowChange(h, w)
+				}
+			}
+		}()
+
+		// 启动交互式 shell（推荐用 Shell()）
+		if err := session.Shell(); err != nil {
+			fmt.Fprintf(os.Stderr, "❌ 启动 shell 失败: %v\n", err)
 			os.Exit(1)
 		}
 
-		// 8. 并发复制数据流
-		var wg sync.WaitGroup
-		wg.Add(3)
+		// 等待用户退出
+		if err := session.Wait(); err != nil {
+			// 可选：记录退出状态，但通常无需处理
+		}
 
-		// 将远程输出打印到本地 stdout
-		go func() {
-			defer wg.Done()
-			io.Copy(os.Stdout, stdout)
-		}()
-
-		// 将远程错误输出到本地 stderr
-		go func() {
-			defer wg.Done()
-			io.Copy(os.Stderr, stderr)
-		}()
-
-		// 将本地输入发送到远程 stdin
-		go func() {
-			defer wg.Done()
-			io.Copy(stdin, os.Stdin)
-		}()
-
-		// 9. 等待会话结束
-		wg.Wait()
 		fmt.Println("\n✅ 已断开连接")
 	},
 }
