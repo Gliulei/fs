@@ -1,5 +1,3 @@
-# 📁 fs - 下一代 SSH 管理与文件同步利器
-
 <div align="center">
 
 [English](./README_en.md) | **中文**
