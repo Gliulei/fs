@@ -1,5 +1,3 @@
-# 📁 fs - File Sync Tool
-
 <div align="center">
 
 **English** | [中文](./README_zh.md)
@@ -10,29 +8,99 @@
 
 </div>
 
-## Introduction
-
-> ⚡ Lightweight command-line tool for SSH server management and file synchronization that makes `scp` and manual SSH management obsolete
-
-`fs` is a comprehensive command-line tool designed for developers and DevOps engineers, providing an integrated solution for SSH server management and file transfer operations. It aims to replace traditional `scp` commands and manual SSH management with a more concise, efficient, and intelligent cross-host operations experience.
-
-Forget complex parameters and manual server management - add, configure, and connect to SSH servers with simple commands, support multi-environment switching, file upload/download, and shell auto-completion, significantly improving remote server management efficiency.
-
 ---
 
-##✨ Features
+# 📁 fs: The Next-Gen SSH Management & File Sync Tool
 
-- ✅ **SSH Server Management**: Add, configure, and manage multiple SSH server connections with simple commands
-- ✅ **One-click File Transfer**: No need to remember complex parameters, complete local-to-remote file copying with one click
-- ✅ **Efficient Transfer**: SSH protocol optimized data stream, supports compression transfer, significantly improves speed
-- ✅ **Smart Completion**: Supports Bash/Zsh auto-completion, automatically recognizes host groups and paths, reduces input errors
--✅ **Cross-platform Support**: Compatible with Linux, macOS, WSL, and Windows PowerShell
-- ✅ **Multi-environment Management**: Quickly switch between development, testing, and production server groups via `fs use <group>`
-- ✅ **Direct SSH Connection**: Connect directly to configured servers with `fs ssh`
-- ✅ **Operation Traceability**: Automatically records command history for auditing and reuse
-- ✅ **Configuration Packaging & Import**: Supports packaging and batch import of configuration files for environment migration and team collaboration
+**Simpler, Smarter, and More Efficient Remote Operations**
 
----
+In today’s fast-paced development and DevOps environments, SSH connections and file transfers are daily essentials. Yet, traditional tools like `scp` and manual `~/.ssh/config` management have become increasingly cumbersome and inefficient. Complex configurations, cryptic command syntax, and lack of centralized control — these pain points are now being redefined by **fs**, a next-generation command-line tool designed to revolutionize how we interact with remote servers.
+
+**fs** is a powerful, all-in-one remote operations toolkit built for developers and system administrators. It integrates SSH management, file synchronization, environment switching, and intelligent auto-completion into a single cohesive workflow — reimagining remote server management for the modern era.
+
+No more juggling configurations or memorizing command flags. With fs, managing SSH servers becomes effortless. Add, configure, and connect to remote hosts with simple commands. Switch between environments, transfer files seamlessly, and enjoy shell auto-completion — all designed to dramatically boost your productivity.
+
+## 🌟 Why Do You Need fs?
+
+Have you ever faced these scenarios?
+
+- Need to send a file but have to look up the IP, username, and port, then piece together a messy `scp` command?
+- Juggle between multiple environments (dev, staging, production), only to accidentally connect to the wrong server?
+- Set up a new machine and spend hours re-creating your SSH configurations?
+- Type commands blindly without auto-completion, leading to typos and debugging nightmares?
+
+**fs is built to solve exactly these problems.**
+
+More than just a tool, fs offers a modern, systematic approach to remote operations. Through intuitive commands, smart interactions, and robust feature integration, fs significantly improves efficiency and accuracy across multi-host workflows.
+
+## ✨ Key Features
+
+### 🔧 1. Simplified SSH Server Management
+
+No more manual config edits. Register a server with just one command:
+
+```
+fs add my-server --host=192.168.1.100 --user=dev --port=22
+```
+
+Supports naming, grouping, and aliases — easily manage dozens or even hundreds of servers.
+
+### 📤 2. One-Click File Transfer
+
+Say goodbye to complicated `scp` syntax. Use the `fs cp` command just like local copying:
+
+```
+fs cp ./app.zip my-server:/opt/deploy/
+```
+
+Supports bidirectional transfer — local ↔ remote has never been easier.
+
+### ⚡ 3. Optimized Transfer Performance
+
+Leverages SSH protocol optimizations with built-in compression to accelerate file transfers, especially beneficial for large files or bulk syncing.
+
+### 🧠 4. Intelligent Shell Auto-Completion
+
+Supports auto-completion for Bash and Zsh. Press `Tab` after `fs cp` to get real-time suggestions for server names, groups, and paths — minimizing errors and boosting speed.
+
+### 🌐 5. Instant Environment Switching
+
+Switch contexts across environments using:
+
+```
+fs use production
+```
+
+Immediately enter production mode with confidence, reducing the risk of accidental operations — ideal for multi-cluster, multi-role operations.
+
+### 💻 6. Cross-Platform Compatibility
+
+Fully supports Linux, macOS, WSL, and Windows PowerShell. No matter your OS, fs integrates smoothly into your workflow.
+
+### 🔗 7. Direct SSH Access
+
+Connect directly via SSH with:
+
+```
+fs ssh <server>
+```
+
+Start an interactive session instantly — no extra steps required.
+
+### 📚 8. Audit-Ready Operation History
+
+Automatically logs frequently used commands and operation history. Easy to review, reuse, and audit — great for debugging and team knowledge sharing.
+
+### 📦 9. Configurable Export & Import
+
+Export your entire server configuration as an encrypted package, or import configurations from others. Simplify onboarding, environment migration, and team collaboration.
+
+## 🚀 Real-World Use Cases
+
+- **Development & Deployment**: Quickly sync build artifacts to test servers.
+- **Operations & Monitoring**: Switch to production group and run health checks in bulk.
+- **Team Collaboration**: Share standardized environment packages so new members can be up and running in minutes.
+- **Multi-Cloud Management**: Centrally manage servers across different cloud providers.
 
 ## 📦 Installation
 
@@ -40,14 +108,14 @@ Forget complex parameters and manual server management - add, configure, and con
 
 #### Linux / macOS (Bash / Zsh)
 
-```bash
-# It's recommended to clear potentially conflicting environment variables before installation
+```
+# Clear conflicting environment variables if needed
 unset GOROOT GOBIN GOPATH
 
-# Download and execute installation script
+# Download and run the install script
 curl -sSL https://gitee.com/liulei152/fs/raw/master/install.sh | bash
 
-# Optional: Avoid alias conflicts (if 'fs' alias already exists)
+# Optional: Avoid alias conflicts (e.g., if 'fs' is already aliased)
 cat << 'EOF' >> ~/.bashrc
 if [[ -n $(alias fs 2>/dev/null) ]]; then
     unalias fs
@@ -60,98 +128,109 @@ source "$HOME/.fs/env"
 
 #### Windows (PowerShell)
 
-```powershell
+```
 iwr https://gitee.com/liulei152/fs/raw/master/install.ps1 -UseBasicParsing | iex
 ```
 
 ### Manual Installation
 
-```bash
+```
 tar -xzf fs-linux-amd64.tar.gz
 sudo mv fs /usr/local/bin/
 ```
 
 ## 🚀 Quick Start
 
-Get started with server management and file operations in just a few commands.
+Get started with a few simple commands for server management and file operations.
 
 ### 1. Initialize Configuration
 
-```bash
+```
 fs init
 ```
 
-### 2. SSH Server Management
+### 2. Manage SSH Servers
 
-```bash
+```
 # Add a new SSH server
 fs add --name web1 --user alice --host 192.168.1.100 --port 22
 
-# View all configured servers
+# List all configured servers
 fs show
 
 # Switch default server
 fs use web1
 
-# Connect directly via SSH
+# Connect via SSH
 fs ssh
 ```
 
-### 3. File Transfer Operations
+### 3. File Transfer
 
-```bash
-# Upload files to remote server
+```
+# Upload file to remote server
 fs upload filename
 
-# Download files from remote server
+# Download file from remote server
 fs download filename
 ```
 
 ### 4. Configuration Management
 
-```bash
-# Package all configurations for backup/team sharing
+```
+# Archive all configs for backup or team sharing
 fs archive
 
-# Package to specified file
+# Archive to a specific file
 fs archive --output my-configs.tar.gz
 
-# Preview package contents
+# Preview contents of an archive
 fs import config-archive.tar.gz --preview
 
-# Import configuration (interactive conflict handling)
+# Import configs (interactive conflict handling)
 fs import config-archive.tar.gz
 
-# Force overwrite import
+# Force override during import
 fs import config-archive.tar.gz --force
 
 # Skip existing configurations
 fs import config-archive.tar.gz --skip-existing
 ```
 
----
+## 🧭 Roadmap
 
-##🧭 Roadmap
+- Add `find` in current directory for file upload
+- Command history logging
+- Configuration addition
+- Bash/Zsh shell auto-completion
+- Configuration deletion
+- Multi-file upload/download support
 
-- [x] Add find functionality in current directory for file upload
-- [x] Record command history
-- [x] Configuration addition
-- [x] SHELL Zsh/Bash auto-completion
-- [x] Configuration deletion
-- [ ] Multi-file download/upload
+## 📞 Contact Us
 
-## 📞 Contact
+For questions, feedback, or collaboration, feel free to reach out:
 
-For questions or feedback, please contact:
-
-- **Name**: shenyi
+- **Name**: Shenyi
 - **Email**: 1245332635@qq.com
-- **GitHub**: [Your GitHub Profile](https://github.com/yourusername)
+- **GitHub**: https://github.com/Gliulei/
 
-##🤝uting
+## 🤝 Contributions Welcome
 
-Contributions are welcome! Please feel free to submit pull requests or open issues.
+We welcome bug reports, feature suggestions, and pull requests!
 
-##📄 License
+**How to contribute:**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the LICENSE file for details.
+
+**fs — Making remote operations simple again.**
+📅 **Today is: February 27, 2026**
+
+---
