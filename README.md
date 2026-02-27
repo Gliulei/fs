@@ -47,10 +47,10 @@ Supports naming, grouping, and aliases — easily manage dozens or even hundreds
 
 ### 📤 2. One-Click File Transfer
 
-Say goodbye to complicated `scp` syntax. Use the `fs cp` command just like local copying:
+Say goodbye to complicated `scp` syntax. Use the `fs upload` command just like local copying:
 
 ```
-fs cp ./app.zip my-server:/opt/deploy/
+fs upload ./app.zip my-server:/opt/deploy/
 ```
 
 Supports bidirectional transfer — local ↔ remote has never been easier.

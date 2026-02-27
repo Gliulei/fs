@@ -47,10 +47,10 @@ fs add my-server --host=192.168.1.100 --user=dev --port=22
 
 ### 📤 2. 一键文件传输
 
-告别复杂的 `scp` 语法。使用 `fs cp` 命令，像本地拷贝一样简单：
+告别复杂的 `scp` 语法。使用 `fs upload` 命令，像本地拷贝一样简单：
 
 ```
-fs cp ./app.zip my-server:/opt/deploy/
+fs upload ./app.zip my-server:/opt/deploy/
 ```
 
 支持双向传输，本地 ↔ 远程一键直达。
