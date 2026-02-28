@@ -12,7 +12,7 @@
 
 ---
 
-# 📁 fs: The Next-Gen SSH Management & File Sync Tool
+# 📁 The Next-Gen SSH Management & File Sync Tool
 
 **Simpler, Smarter, and More Efficient Remote Operations**
 
